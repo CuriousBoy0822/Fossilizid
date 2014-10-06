@@ -31,8 +31,7 @@ CHANNEL connect(QUEUE que, ENDPOINT ep){
 }
 
 template<class CMD, class CMDTOBUF>
-bool push(CHANNEL ch, CMD & cmd){
-	CMDTOBUF fn;
+bool push(CHANNEL ch, CMD & cmd, CMDTOBUF fn = CMDTOBUF()){
 	std::pair<char *, int> buf = fn(cmd);
 
 	WSABUF * wsabuf = pool::objpool<WSABUF>::allocator(1);
@@ -52,8 +51,7 @@ bool push(CHANNEL ch, CMD & cmd){
 }
 
 template<class CMD, class BUFTOCMD>
-bool pop(CHANNEL ch, CMD & cmd){
-	BUFTOCMD fn;
+bool pop(CHANNEL ch, CMD & cmd, BUFTOCMD fn = BUFTOCMD()){
 	int recvlen = 0;
 
 	while (1){

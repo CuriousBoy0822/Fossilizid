@@ -44,10 +44,10 @@ private:
 
 	_hazard_node_system _node_system;
 
-
 public:
 	deque();
 	~deque();
+
 
 
 private:
