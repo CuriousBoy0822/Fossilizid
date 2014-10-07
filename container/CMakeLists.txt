@@ -11,7 +11,6 @@ SET(header_files
     optimisticque.h
     ringque.h
     swapque.h
-    deque.h
 )
 
 SET(SRC_LIST 

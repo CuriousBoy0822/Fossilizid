@@ -91,6 +91,10 @@ bool pop(CHANNEL ch, CMD & cmd, BUFTOCMD fn = BUFTOCMD()){
 			return false;
 		}
 		((channelimpl*)ch)->index += cmdbuflen;
+
+		if (((channelimpl*)ch)->index == ((channelimpl*)ch)->buflen){
+			((channelimpl*)ch)->index = 0;
+		}
 	}
 
 	return true;
