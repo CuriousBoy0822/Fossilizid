@@ -6,6 +6,7 @@ AUX_SOURCE_DIRECTORY(./windows windows_DIR_SRC)
 
 SET(header_files
     queue.h
+    close.h
     acceptor.h
     channel.h
     endpoint.h

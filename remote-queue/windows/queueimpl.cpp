@@ -27,7 +27,7 @@ QUEUE queue(){
 
 	impl->iocp = CreateIoCompletionPort(0, 0, 0, corenum);
 
-	return (QUEUE)impl;
+	return (QUEUE)((handle*)impl);
 }
 
 EVENT queue(QUEUE que){

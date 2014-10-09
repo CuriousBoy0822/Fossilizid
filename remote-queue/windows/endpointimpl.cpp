@@ -22,7 +22,7 @@ ENDPOINT endpoint(char * ip, short port){
 	impl->addr.sin_port = port;
 	impl->_handle_type = handle_endpoint_type;
 
-	return (ENDPOINT)impl;
+	return (ENDPOINT)((handle*)impl);
 }
 
 } /* namespace remote_queue */

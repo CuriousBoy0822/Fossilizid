@@ -27,7 +27,7 @@ CHANNEL connect(QUEUE que, ENDPOINT ep){
 	ch->que = que;
 	ch->_handle_type = handle_channel_type;
 
-	return (CHANNEL)ch;
+	return (CHANNEL)((handle*)ch);
 }
 
 template<class CMD, class CMDTOBUF>

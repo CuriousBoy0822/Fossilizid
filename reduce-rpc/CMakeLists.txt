@@ -4,9 +4,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 AUX_SOURCE_DIRECTORY(. DIR_SRC)
 
 SET(header_files
-    channel.h
-    queue.h
-    
+    service.h
+    session.h
 )
 
 SET(SRC_LIST 

@@ -9,6 +9,7 @@
 
 #include "channel.h"
 #include "acceptor.h"
+#include "endpoint.h"
 
 namespace Fossilizid{
 namespace remote_queue {

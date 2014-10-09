@@ -52,7 +52,7 @@ ACCEPTOR acceptor(QUEUE que, ENDPOINT ep){
 	acceptorimlp * impl = (acceptorimlp*)pool::objpool<acceptorimlp>::allocator(1);
 	new (impl)acceptorimlp(que, ep);
 
-	return (ACCEPTOR)impl;
+	return (ACCEPTOR)((handle*)impl);
 }
 
 CHANNEL accept(ACCEPTOR ap){
