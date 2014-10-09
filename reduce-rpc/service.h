@@ -10,6 +10,8 @@
 #include <time.h>
 #include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
+#include <boost/atomic.hpp>
 #include "session.h"
 #include "../remote-queue/queue.h"
 
@@ -27,15 +29,23 @@ namespace reduce_rpc{
 
 class service{
 public:
-	service();
+	service(char * ip, short port);
 	~service();
 
 	void run();
 
 private:
-	boost::uint64_t timestamp;
+	boost::thread_group _thread_group;
 
+	boost::atomic_bool isrun;
+
+	boost::uint64_t clockstamp;
+	boost::uint64_t timestamp;
+	
+	remote_queue::ENDPOINT ep;
 	remote_queue::QUEUE que;
+	remote_queue::ACCEPTOR acp;
+
 	boost::unordered_map<remote_queue::CHANNEL, boost::shared_ptr<session> > map_session;
 
 };

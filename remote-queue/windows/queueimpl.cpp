@@ -31,7 +31,7 @@ QUEUE queue(){
 }
 
 EVENT queue(QUEUE que){
-	queueimpl * impl = (queueimpl *)que;
+	queueimpl * impl = (queueimpl *)((handle*)que);
 
 	EVENT ev;
 	DWORD bytes = 0;

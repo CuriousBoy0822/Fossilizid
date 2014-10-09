@@ -7,10 +7,10 @@
 #ifndef _endpoint_h
 #define _endpoint_h
 
+#include "typedef.h"
+
 namespace Fossilizid{
 namespace remote_queue {
-
-typedef void* ENDPOINT;
 
 ENDPOINT endpoint(char * ip, short port);
 

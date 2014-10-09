@@ -10,6 +10,7 @@ SET(header_files
     acceptor.h
     channel.h
     endpoint.h
+    typedef.h
     ./windows/overlapped.h
     ./windows/handle.h
     ./windows/acceptorimpl.h

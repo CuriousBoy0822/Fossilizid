@@ -5,7 +5,6 @@
  *      Author: qianqians
  */
 #ifdef _WINDOWS
-#include <Windows.h>
 
 #include <exception>
 
@@ -27,7 +26,7 @@ acceptorimlp::acceptorimlp(QUEUE que, ENDPOINT ep){
 	sl = socket(AF_INET, SOCK_STREAM, 0);
 	sa = socket(AF_INET, SOCK_STREAM, 0);
 
-	if (bind(sl, (sockaddr*)(&((endpointimpl*)ep)->addr), sizeof(SOCKADDR_IN)) != 0){
+	if (bind(sl, (sockaddr*)(&((endpointimpl*)((handle*)ep))->addr), sizeof(SOCKADDR_IN)) != 0){
 		throw std::exception("bind error");
 	}
 
@@ -40,7 +39,7 @@ acceptorimlp::acceptorimlp(QUEUE que, ENDPOINT ep){
 	GetSystemInfo(&info);
 	corenum = info.dwNumberOfProcessors;
 
-	CreateIoCompletionPort((HANDLE)sa, ((queueimpl*)que)->iocp, 0, corenum);
+	CreateIoCompletionPort((HANDLE)sa, ((queueimpl*)((handle*)que))->iocp, 0, corenum);
 
 	overlappedex * ovlp = pool::objpool<overlappedex>::allocator(1);
 	ovlp->h = (handle*)this;
@@ -58,9 +57,9 @@ ACCEPTOR acceptor(QUEUE que, ENDPOINT ep){
 CHANNEL accept(ACCEPTOR ap){
 	channelimpl * ch = pool::objpool<channelimpl>::allocator(1);
 	ch->_handle_type = handle_channel_type;
-	ch->s = ((acceptorimlp*)ap)->sa;
+	ch->s = ((acceptorimlp*)((handle*)ap))->sa;
 
-	setsockopt(ch->s, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char *)&((acceptorimlp*)ap)->sl, sizeof(((acceptorimlp*)ap)->sl));
+	setsockopt(ch->s, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char *)&((acceptorimlp*)((handle*)ap))->sl, sizeof(((acceptorimlp*)((handle*)ap))->sl));
 
 	return (CHANNEL)ch;
 }

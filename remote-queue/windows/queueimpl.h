@@ -5,7 +5,7 @@
  *      Author: qianqians
  */
 #ifdef _WINDOWS
-#include <Windows.h>
+#include <WinSock2.h>
 
 #ifndef _queueimpl_h
 #define _queueimpl_h

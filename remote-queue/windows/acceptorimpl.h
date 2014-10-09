@@ -5,7 +5,11 @@
  *      Author: qianqians
  */
 #ifdef _WINDOWS
-#include <Windows.h>
+#include <Mswsock.h>
+#include <WinSock2.h>
+
+#pragma comment(lib, "Ws2_32.lib")
+#pragma comment(lib, "Mswsock.lib")
 
 #ifndef _acceptorimlp_h
 #define _acceptorimlp_h

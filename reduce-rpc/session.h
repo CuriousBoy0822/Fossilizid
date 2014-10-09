@@ -7,22 +7,35 @@
 #ifndef _session_h
 #define _session_h
 
+#include <functional>
+#include <map>
+#include <string>
+
+#include <boost/cstdint.hpp>
+
 #include "../remote-queue/queue.h"
 #include "../../jsoncpp/jsoncpp/include/json/json.h"
+
+#include "remote_obj.h"
 
 namespace Fossilizid{
 namespace reduce_rpc{
 
 class session{
 public:
-	session();
+	session(remote_queue::CHANNEL _ch);
 	~session();
 
-	void call_rpc_mothed();
+	void add_time(boost::uint64_t time, std::function<void(boost::uint64_t) > fn);
+
+	void do_time(boost::uint64_t time);
+
+	void do_recv(Json::Value & value);
 
 private:
 	remote_queue::CHANNEL ch;
-	
+
+	std::map<boost::uint64_t, boost::shared_ptr<remote_obj> > mapremote_obj;
 
 };
 

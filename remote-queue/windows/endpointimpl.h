@@ -5,7 +5,7 @@
  *      Author: qianqians
  */
 #ifdef _WINDOWS
-#include <Windows.h>
+#include <WinSock2.h>
 
 #ifndef _endpointimpl_h
 #define _endpointimpl_h

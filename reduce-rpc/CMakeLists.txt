@@ -6,6 +6,7 @@ AUX_SOURCE_DIRECTORY(. DIR_SRC)
 SET(header_files
     service.h
     session.h
+    remote_obj.h
 )
 
 SET(SRC_LIST 

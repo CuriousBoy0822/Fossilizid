@@ -5,7 +5,7 @@
  *      Author: qianqians
  */
 #ifdef _WINDOWS
-#include <Windows.h>
+#include <WinSock2.h>
 
 #ifndef _channelimpl_h
 #define _channelimpl_h

@@ -119,7 +119,7 @@ public:
 		}
 
 		if (ret == 0){
-			ret = malloc(sizeof(T) * len);
+			ret = (T*)malloc(sizeof(T) * len);
 		}
 		
 		return ret;

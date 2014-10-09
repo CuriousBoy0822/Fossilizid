@@ -10,11 +10,10 @@
 #include "channel.h"
 #include "acceptor.h"
 #include "endpoint.h"
+#include "close.h"
 
 namespace Fossilizid{
 namespace remote_queue {
-
-typedef void * QUEUE;
 
 QUEUE queue();
 

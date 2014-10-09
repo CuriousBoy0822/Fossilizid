@@ -7,12 +7,10 @@
 #ifndef _channel_h
 #define _channel_h
 
-#include "endpoint.h"
+#include "typedef.h"
 
 namespace Fossilizid{
 namespace remote_queue {
-
-typedef void* CHANNEL;
 
 CHANNEL connect(ENDPOINT ep);
 

@@ -7,13 +7,10 @@
 #ifndef _acceptor_h
 #define _acceptor_h
 
-#include "endpoint.h"
-#include "channel.h"
+#include "typedef.h"
 
 namespace Fossilizid{
 namespace remote_queue{
-
-typedef void* ACCEPTOR;
 
 ACCEPTOR acceptor(QUEUE que, ENDPOINT ep);
 
