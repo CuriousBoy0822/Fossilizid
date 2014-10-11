@@ -52,9 +52,12 @@ bool push(CHANNEL ch, CMD & cmd, CMDTOBUF fn){
 
 template<class CMD, class BUFTOCMD>
 bool pop(CHANNEL ch, CMD & cmd, BUFTOCMD fn){
-	int recvlen = 0;
+	channelimpl * implch = (channelimpl*)((handle*)ch);
 
 	while (1){
+		char * buf = implch->buf;
+		int buflen = implch->buflen - implch->windex;
+
 		int len = recv(((channelimpl*)((handle*)ch))->s, buf, buflen, 0);
 		
 		if (len > 0 && len < buflen){
@@ -76,24 +79,25 @@ bool pop(CHANNEL ch, CMD & cmd, BUFTOCMD fn){
 			break;
 		}
 
-		recvlen += len;
-		int buflen = ((channelimpl*)((handle*)ch))->buflen;
-		((channelimpl*)((handle*)ch))->buflen *= 2;
-		char * tmp = ((channelimpl*)((handle*)ch))->buf;
-		((channelimpl*)((handle*)ch))->buf = (char*)pool::mempool::allocator(buflen);
-		memcpy(((channelimpl*)((handle*)ch))->buf, tmp, buflen);
+		implch->windex += len;
+		buflen = implch->buflen;
+		implch->buflen *= 2;
+		char * tmp = implch->buf;
+		implch->buf = (char*)pool::mempool::allocator(implch->buflen);
+		memcpy(implch->buflen->buf, tmp, buflen);
 		pool::mempool::deallocator(tmp, buflen);
 	}
 
-	if (((channelimpl*)((handle*)ch))->index > 0){
+	if (implch->windex > 0){
 		int cmdbuflen = 0;
-		if (!fn(cmd, ((channelimpl*)((handle*)ch))->buf + ((channelimpl*)((handle*)ch))->index, cmdbuflen)){
+		if ((cmdbuflen = fn(cmd, implch->buf + implch->rindex, implch->windex)) > 0){
 			return false;
 		}
-		((channelimpl*)((handle*)ch))->index += cmdbuflen;
+		implch->rindex += cmdbuflen;
 
-		if (((channelimpl*)((handle*)ch))->index == ((channelimpl*)((handle*)ch))->buflen){
-			((channelimpl*)((handle*)ch))->index = 0;
+		if (implch->rindex == implch->windex){
+			implch->rindex = 0;
+			implch->windex = 0;
 		}
 	}
 

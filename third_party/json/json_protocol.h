@@ -4,8 +4,8 @@
  *  Created on: 2014-10-3
  *      Author: qianqians
  */
-#ifndef _acceptor_h
-#define _acceptor_h
+#ifndef _json_protocol_h
+#define _json_protocol_h
 
 #include "jsoncpp/include/json/json.h"
 #include "../../pool/mempool.h"
@@ -72,4 +72,4 @@ int buf_to_json(Json::Value & value, char * buf, int len){
 } /* namespace remote_queue */
 } /* namespace Fossilizid */
 
-#endif //_acceptor_h
+#endif //_json_protocol_h

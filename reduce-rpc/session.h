@@ -12,6 +12,7 @@
 #include <string>
 
 #include <boost/cstdint.hpp>
+#include <boost/thread.hpp>
 
 #include "../remote-queue/queue.h"
 #include "../../jsoncpp/jsoncpp/include/json/json.h"
@@ -36,6 +37,9 @@ private:
 	remote_queue::CHANNEL ch;
 
 	std::map<boost::uint64_t, boost::shared_ptr<remote_obj> > mapremote_obj;
+
+	boost::mutex mu;
+	std::map<boost::uint64_t, std::function<void(boost::uint64_t) > > maptime;
 
 };
 

@@ -11,6 +11,10 @@
 #include <map>
 #include <boost/thread/mutex.hpp>
 
+#ifdef _WINDOWS
+#include <Windows.h>
+#endif
+
 namespace Fossilizid{
 namespace pool{
 
@@ -27,99 +31,107 @@ template<typename T>
 class objpool{
 public:
 	objpool(){
-		objpool::bInit = false;
+		bInit = false;
 
-		if (!objpool::bInit){
-			boost::mutex::scoped_lock l(objpool::mu);
-			if (objpool::bInit){
-				return
+		if (!bInit){
+			boost::mutex::scoped_lock l(mu);
+			if (bInit){
+				return;
 			}
 
-			objpool::corenum = 8;
+			corenum = 8;
 #ifdef _WINDOWS
 			SYSTEM_INFO info;
 			GetSystemInfo(&info);
-			objpool::corenum = info.dwNumberOfProcessors;
+			corenum = info.dwNumberOfProcessors;
 #endif
-			vpool.reserve(objpool::corenum);
-			for (int i = 0; i < objpool::corenum; i++){
-				vpool[i]._block = 0;
-				vpool[i]._block8 = 0;
-				vpool[i]._block16 = 0;
-				vpool[i].recvlistchunk.clear();
+			_vpool.resize(corenum);
+			for (int i = 0; i < corenum; i++){
+				_vpool[i] = new Tblock<T>;
+				_vpool[i]->_block = 0;
+				_vpool[i]->_block8 = 0;
+				_vpool[i]->_block16 = 0;
+				_vpool[i]->recvlistchunk.clear();
 			}
 		}
 	}
 
 	~objpool(){
-		for (int i = 0; i < objpool::corenum; i++){
-			for (T * p = objpool::vpool[i]._block; p != 0;){
+		for (int i = 0; i < corenum; i++){
+			for (T * p = _vpool[i]->_block; p != 0;){
 				T * tmp = p;
 				p = *(T**(p));
 				delete tmp;
 			}
-			objpool::vpool[i]._block = 0;
+			_vpool[i]->_block = 0;
 
-			for (T * p = objpool::vpool[i]._block8; p != 0;){
+			for (T * p = _vpool[i]->_block8; p != 0;){
 				T * tmp = p;
 				p = *(T**(p));
 				delete[] tmp;
 
  			}
-			objpool::vpool[i]._block8 = 0;
+			_vpool[i]->_block8 = 0;
 			
-			for (T * p = objpool::vpool[i]._block8; p != 0;){
+			for (T * p = _vpool[i]->_block8; p != 0;){
 				T * tmp = p;
 				p = *(T**(p));
 				delete[] tmp;
 			}
-			objpool::vpool[i]._block16 = 0;
+			_vpool[i]->_block16 = 0;
 
-			for (auto var : objpool::vpool[i].recvlistchunk){
+			for (auto var : _vpool[i]->recvlistchunk){
 				delete var.second;
 			}
-			objpool::vpool[i].recvlistchunk.clear();
+			_vpool[i]->recvlistchunk.clear();
+
+			for (int i = 0; i < corenum; i++){
+				delete _vpool[i];
+			}
 		}
 	}
 
 public:
+	static void Init(){
+		phandle = new objpool;
+	}
+
 	static T * allocator(int len){
 		T * ret = 0;
-		for (int i = 0; i < objpool::corenum; i++){
-			boost::mutex::scoped_try_lock l(objpool::vpool[i].mu);
+		for (int i = 0; i < phandle->corenum; i++){
+			boost::mutex::scoped_try_lock l(phandle->_vpool[i]->mu);
 			if (l.owns_lock()){
 				if (len == 1){
-					if (objpool::vpool[i]._block != 0){
-						ret = objpool::vpool[i]._block;
-						objpool::vpool[i]._block = *((T**)(objpool::vpool[i]._block));
+					if (phandle->_vpool[i]->_block != 0){
+						ret = phandle->_vpool[i]->_block;
+						phandle->_vpool[i]->_block = *((T**)((void*)ret));
 					}
 				}
 				if (len > 1 && len <= 8){
 					len = 8;
-					if (objpool::vpool[i]._block != 0){
-						ret = objpool::vpool[i]._block8;
-						objpool::vpool[i]._block8 = *((T**)(objpool::vpool[i]._block8));
+					if (phandle->_vpool[i]->_block8 != 0){
+						ret = phandle->_vpool[i]->_block8;
+						phandle->_vpool[i]->_block8 = *((T**)((void*)phandle->_vpool[i]->_block8));
 					}
 				} else if (len > 8 && len <= 16){
 					len = 16;
-					if (objpool::vpool[i]._block != 0){
-						ret = objpool::vpool[i]._block16;
-						objpool::vpool[i]._block16 = *((T**)(objpool::vpool[i]._block16));
+					if (phandle->_vpool[i]->_block16 != 0){
+						ret = phandle->_vpool[i]->_block16;
+						phandle->_vpool[i]->_block16 = *((T**)((void*)phandle->_vpool[i]->_block16));
 					}
 				} else{
 					len = (len + 15) / 16 * 16;
-					if (!objpool::vpool[i].recvlistchunk.empty()){
-						std::map<int, T * >::iterator it = objpool::vpool[i].recvlistchunk.lower_bound(len);
+					if (!phandle->_vpool[i]->recvlistchunk.empty()){
+						std::map<int, T * >::iterator it = phandle->_vpool[i]->recvlistchunk.lower_bound(len);
 						ret = it->second;
-						objpool::vpool[i].recvlistchunk.erase(it);
+						phandle->_vpool[i]->recvlistchunk.erase(it);
 					}
 				}
-				
 			}
 		}
 
 		if (ret == 0){
-			ret = (T*)malloc(sizeof(T) * len);
+			ret = (T*)malloc((sizeof(T)+7)/8*8*len);
 		}
 		
 		return ret;
@@ -129,45 +141,56 @@ public:
 		T * ret = 0;
 		int i = 0;
 		while(1){
-			boost::mutex::scoped_try_lock l(objpool::vpool[i].mu);
+			boost::mutex::scoped_try_lock l(phandle->_vpool[i]->mu);
 			if (l.owns_lock()){
 				if (len == 1){
 					buff->~T();
-					*((T**)(buff)) = objpool::vpool[i]._block;
-					objpool::vpool[i]._block = buff;
+					memset(buff, 0, sizeof(buff));
+					*((void**)((void*)buff)) = (void*)phandle->_vpool[i]->_block;
+					phandle->_vpool[i]->_block = buff;
 				}
 				if (len > 1 && len <= 8){
 					for (int _i = 0; _i < 8; _i++){
 						buff->~T();
 					}
-					*((T**)(buff)) = objpool::vpool[i]._block8;
-					objpool::vpool[i]._block8 = buff; 
+					memset(buff, 0, sizeof(buff));
+					*((void**)((void*)buff)) = (void*)phandle->_vpool[i]->_block8;
+					phandle->_vpool[i]->_block8 = buff;
 				} else if (len > 8 && len <= 16){
 					for (int _i = 0; _i < 16; _i++){
 						buff->~T();
 					}
-					*((T**)(buff)) = objpool::vpool[i]._block16;
-					objpool::vpool[i]._block16 = buff;
+					memset(buff, 0, sizeof(buff));
+					*((void**)((void*)buff)) = (void*)phandle->_vpool[i]->_block16;
+					phandle->_vpool[i]->_block16 = buff;
 				} else{
 					len = (len + 15) / 16 * 16;
 					for (int _i = 0; _i < len; _i++){
 						buff->~T();
 					}
-					objpool::vpool[i].recvlistchunk.insert(std::make_pair(len, buff));
+					memset(buff, 0, sizeof(buff));
+					phandle->_vpool[i]->recvlistchunk.insert(std::make_pair(len, buff));
 				}
 				break;
 			}
-			i += 1;
+			
+			if (++i == phandle->corenum){
+				i = 0;
+			}
 		}
 	}
 
 private:
-	static std::vector<Tblock<T> > vpool;
-	static boost::mutex mu;
-	static bool bInit;
-	static int corenum;
+	static objpool * phandle;
+
+	std::vector<Tblock<T> * > _vpool;
+	bool bInit;
+	int corenum;
 
 };
+
+template<typename T>
+objpool<T> * objpool<T>::phandle;
 
 } /* namespace pool */
 } /* namespace Fossilizid */

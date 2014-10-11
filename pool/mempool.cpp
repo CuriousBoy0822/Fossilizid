@@ -13,6 +13,11 @@
 namespace Fossilizid{
 namespace pool {
 
+mempool __mempool__;
+
+std::vector<block * > mempool::vpool;
+int mempool::corenum;
+
 static int chunck_normal_len = 1048576;
 
 static mempool pool; 

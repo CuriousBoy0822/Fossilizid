@@ -10,7 +10,7 @@
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/atomic.hpp>
 
-#include <Fossilizid/container/detail/_hazard_ptr.h>
+#include "../container/detail/_hazard_ptr.h"
 #include "../pool/objpool.h"
 
 namespace Fossilizid{

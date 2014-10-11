@@ -22,7 +22,8 @@ struct channelimpl : public handle{
 		_handle_type = handle_channel_type;
 		s = s_;
 
-		index = 0;
+		rindex = 0;
+		windex = 0;
 		buflen = 65536;
 		buf = (char*)pool::mempool::allocator(buflen);
 	}
@@ -30,7 +31,7 @@ struct channelimpl : public handle{
 	QUEUE que;
 
 	char * buf;
-	int buflen, index;
+	int buflen, rindex, windex;
 	SOCKET s;
 };
 

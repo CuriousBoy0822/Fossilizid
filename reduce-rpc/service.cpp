@@ -5,6 +5,7 @@
  *      Author: qianqians
  */
 #include "service.h"
+#include "../third_party/json/json_protocol.h"
 
 namespace Fossilizid{
 namespace reduce_rpc {
@@ -46,13 +47,29 @@ void service::run(){
 			break;
 				
 		case remote_queue::event_type_accept:
-			ev.handle.acp;
+			{
+				remote_queue::CHANNEL ch = remote_queue::accept(ev.handle.acp);
+				if (ch != 0){
+					map_session[ch] = boost::shared_ptr<session>(new session(ch));
+				}
+			}
 			break;
 
 		case remote_queue::event_type_recv:
+			{
+				remote_queue::CHANNEL ch = ev.handle.ch;
+				Json::Value value;
+				if (remote_queue::pop(ch, value, boost::bind(json_parser::buf_to_json))){
+					map_session[ch]->do_recv(value);
+				}
+			}
 			break;
 
 		case remote_queue::event_type_disconnect:
+			{
+				map_session.erase(ev.handle.ch);
+				remote_queue::close(ev.handle.ch);
+			}
 			break;
 
 		default:
@@ -60,7 +77,9 @@ void service::run(){
 		}
 
 		timestamp += _clock() - clockstamp;
-
+		for (auto var : map_session){
+			var.second->do_time(timestamp);
+		}
 	}
 }
 
