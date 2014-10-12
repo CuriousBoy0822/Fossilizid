@@ -6,10 +6,6 @@
  */
 #include "objpool.h"
 
-#ifdef _WINDOWS
-#include <Windows.h>
-#endif
-
 namespace Fossilizid{
 namespace pool {
 

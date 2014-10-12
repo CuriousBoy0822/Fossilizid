@@ -11,3 +11,4 @@ SET(SRC_LIST
 )
 
 add_executable(test_container ${SRC_LIST} ${header_files})
+target_link_libraries(test_container pool)

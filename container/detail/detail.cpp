@@ -2,7 +2,6 @@
  *  qianqians
  *  2014-10-5
  */
-#include "../deque.h"
 #include "../msque.h"
 #include "../optimisticque.h"
 #include "../ringque.h"

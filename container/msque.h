@@ -44,8 +44,6 @@ private:
 		
 public:
 	msque(void) : _hazard_sys(boost::bind(&msque::put_node, this, _1)), _hazard_list(boost::bind(&msque::put_list, this, _1)){
-		pool::objpool<_list_node>::Init();
-
 		__list.store(get_list());
 	}
 
