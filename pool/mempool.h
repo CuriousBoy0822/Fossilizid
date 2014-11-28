@@ -15,13 +15,7 @@ namespace Fossilizid{
 namespace pool{
 
 struct block{
-	char * buff;
-	int len, index;
-	char * recvlist4K;
-	char * recvlist8K;
-	char * recvlist16K;
-	char * recvlist32K;
-	char * recvlist64K;
+	char * recvlist[11];
 	std::map<int, char * > recvlistchunk;
 	boost::mutex mu;
 };

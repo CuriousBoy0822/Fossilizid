@@ -23,31 +23,57 @@ static int chunck_normal_len = 1048576;
 static bool bInit = false;
 static boost::mutex mu;
 
+static int _1K = 32768;
+static int _2K = 65536;
 static int _4K = 4096;
 static int _8K = 8192;
 static int _16K = 16384;
 static int _32K = 32768;
 static int _64K = 65536;
 
-int standardization_lenght(int len){
-	if (len <= _4K){
+inline int standardization_lenght(int & len){
+	if (len <= 8){
+		len = 8;
+		return 0;
+	}else if (len <= 32){
+		len = 32;
+		return 1;
+	}else if (len <= 128){
+		len = 128;
+		return 2;
+	}else if (len <= 512){
+		len = 512;
+		return 3;
+	}else if (len <= _1K){
+		len = _1K;
+		return 4;
+	}else if (len <= _2K){
+		len = _2K;
+		return 5;
+	}else if (len <= _4K){
 		len = _4K;
+		return 6;
 	} else if (len <= _8K){
 		len = _8K;
+		return 7;
 	} else if (len <= _16K){
 		len = _16K;
+		return 8;
 	} else if (len <= _32K){
 		len = _32K;
+		return 9;
 	} else if (len <= _64K){
 		len = _64K;
+		return 10;
 	} else{
 		len = (len + _4K - 1) / _4K * _4K;
 	}
 
-	return len;
+	return -1;
 }
 
 mempool::mempool(){
+#ifdef ___mempool___
 	if (bInit == false){
 		boost::mutex::scoped_lock lock(mu);
 		if (bInit == true){
@@ -63,67 +89,59 @@ mempool::mempool(){
 		mempool::vpool.resize(mempool::corenum);
 		for (int i = 0; i < mempool::corenum; i++){
 			mempool::vpool[i] = new block;
-			mempool::vpool[i]->buff = new char[chunck_normal_len];
-			mempool::vpool[i]->len = chunck_normal_len;
-			mempool::vpool[i]->index = 0;
-			mempool::vpool[i]->recvlist4K = 0;
-			mempool::vpool[i]->recvlist8K = 0;
-			mempool::vpool[i]->recvlist16K = 0;
-			mempool::vpool[i]->recvlist32K = 0;
-			mempool::vpool[i]->recvlist64K = 0;
+			mempool::vpool[i]->recvlist[0] = (char*)malloc(8);
+			memset(mempool::vpool[i]->recvlist[0], 0, 8);
+			mempool::vpool[i]->recvlist[1] = (char*)malloc(32);
+			memset(mempool::vpool[i]->recvlist[1], 0, 32);
+			mempool::vpool[i]->recvlist[2] = (char*)malloc(128);
+			memset(mempool::vpool[i]->recvlist[2], 0, 128);
+			mempool::vpool[i]->recvlist[3] = (char*)malloc(512);
+			memset(mempool::vpool[i]->recvlist[3], 0, 512);
+			mempool::vpool[i]->recvlist[4] = (char*)malloc(_1K);
+			memset(mempool::vpool[i]->recvlist[4], 0, _1K);
+			mempool::vpool[i]->recvlist[5] = (char*)malloc(_2K);
+			memset(mempool::vpool[i]->recvlist[4], 0, _2K);
+			mempool::vpool[i]->recvlist[6] = (char*)malloc(_4K);
+			memset(mempool::vpool[i]->recvlist[4], 0, _4K);
+			mempool::vpool[i]->recvlist[7] = (char*)malloc(_8K);
+			memset(mempool::vpool[i]->recvlist[4], 0, _8K);
+			mempool::vpool[i]->recvlist[8] = (char*)malloc(_16K);
+			memset(mempool::vpool[i]->recvlist[4], 0, _16K);
+			mempool::vpool[i]->recvlist[9] = (char*)malloc(_32K);
+			memset(mempool::vpool[i]->recvlist[4], 0, _32K);
+			mempool::vpool[i]->recvlist[10] = (char*)malloc(_64K);
+			memset(mempool::vpool[i]->recvlist[4], 0, _64K);
 		}
 	}
+#endif
 }
 
 mempool::~mempool(){
-	if (bInit == false){
+#ifdef ___mempool___
+	if (bInit == true){
 		boost::mutex::scoped_lock lock(mu);
-		if (bInit == true){
-			return;
-		}
 
 		for (int i = 0; i < mempool::corenum; i++){
-			delete mempool::vpool[i]->buff;
 			delete mempool::vpool[i];
 		}
 		mempool::vpool.clear();
 	}
+#endif
 }
 
 void * mempool::allocator(int len){
+#ifdef ___mempool___
+	int recvlistindex = standardization_lenght(len);
 	void * mem = 0;
 	for (int index = 0; index < mempool::corenum; index++){
 		boost::mutex::scoped_try_lock lock(mempool::vpool[index]->mu);
 		if (lock.owns_lock()){
-			if (len < (mempool::vpool[index]->len - mempool::vpool[index]->index)){
-				mem = mempool::vpool[index]->buff + mempool::vpool[index]->index;
-				mempool::vpool[index]->index += len;
-			} else{
-				if (len < _4K && mempool::vpool[index]->recvlist4K != 0 && mem == 0){
-					mem = mempool::vpool[index]->recvlist4K;
-					mempool::vpool[index]->recvlist4K = *((char**)mem);
+			if (recvlistindex >= 0){
+				if (len <= _4K && mempool::vpool[index]->recvlist[recvlistindex] != 0 && mem == 0){
+					mem = mempool::vpool[index]->recvlist[recvlistindex];
+					mempool::vpool[index]->recvlist[recvlistindex] = *((char**)mem);
 				}
-
-				if (len < _8K && mempool::vpool[index]->recvlist8K != 0 && mem == 0){
-					mem = mempool::vpool[index]->recvlist8K;
-					mempool::vpool[index]->recvlist8K = *((char**)mem);
-				}
-
-				if (len < _16K && mempool::vpool[index]->recvlist16K != 0 && mem == 0){
-					mem = mempool::vpool[index]->recvlist16K;
-					mempool::vpool[index]->recvlist16K = *((char**)mem);
-				}
-
-				if (len < _32K && mempool::vpool[index]->recvlist32K != 0 && mem == 0){
-					mem = mempool::vpool[index]->recvlist32K;
-					mempool::vpool[index]->recvlist32K = *((char**)mem);
-				}
-
-				if (len < _64K && mempool::vpool[index]->recvlist64K != 0 && mem == 0){
-					mem = mempool::vpool[index]->recvlist64K;
-					mempool::vpool[index]->recvlist64K = *((char**)mem);
-				}
-
+			}else{
 				if (mem == 0){
 					std::map<int, char * >::iterator find = mempool::vpool[index]->recvlistchunk.lower_bound(len);
 					if (find != mempool::vpool[index]->recvlistchunk.end()){
@@ -139,34 +157,29 @@ void * mempool::allocator(int len){
 	}
 
 	if (mem == 0){
-		mem = new char[standardization_lenght(len)];
+		mem = malloc(len);
 	}
 
 	return mem;
+#else
+
+	return malloc(len);
+
+#endif //___mempool___
 }
 
 void mempool::deallocator(void * buff, int len){
+#ifdef ___mempool___
+	int recvlistindex = standardization_lenght(len);
 	int index = 0;
 	while (1){
 		boost::mutex::scoped_try_lock lock(mempool::vpool[index]->mu);
 		if (lock.owns_lock()){
-			if (len < _4K){
-				*((char**)buff) = mempool::vpool[index]->recvlist4K;
-				mempool::vpool[index]->recvlist4K = (char*)buff;
-			} else if (len < _8K){
-				*((char**)buff) = mempool::vpool[index]->recvlist8K;
-				mempool::vpool[index]->recvlist8K = (char*)buff;
-			} else if (len < _16K){
-				*((char**)buff) = mempool::vpool[index]->recvlist16K;
-				mempool::vpool[index]->recvlist16K = (char*)buff;
-			} else if (len < _32K){
-				*((char**)buff) = mempool::vpool[index]->recvlist32K;
-				mempool::vpool[index]->recvlist32K = (char*)buff;
-			} else if (len < _64K){
-				*((char**)buff) = mempool::vpool[index]->recvlist64K;
-				mempool::vpool[index]->recvlist64K = (char*)buff;
+			if (recvlistindex >= 0){
+				*((char**)buff) = mempool::vpool[index]->recvlist[recvlistindex];
+				mempool::vpool[index]->recvlist[recvlistindex] = (char*)buff;
 			} else {
-				mempool::vpool[index]->recvlistchunk.insert(std::make_pair(standardization_lenght(len), (char*)(buff)));
+				mempool::vpool[index]->recvlistchunk.insert(std::make_pair(len, (char*)(buff)));
 			}
 			break;
 		}
@@ -175,6 +188,11 @@ void mempool::deallocator(void * buff, int len){
 			index = 0;
 		}
 	}
+#else
+
+	free(buff);
+
+#endif //___mempool___
 }	
 
 } /* namespace pool */

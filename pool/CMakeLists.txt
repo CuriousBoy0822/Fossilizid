@@ -6,6 +6,7 @@ AUX_SOURCE_DIRECTORY(. DIR_SRC)
 SET(header_files 
     mempool.h
     objpool.h
+    factory.h
 )
 
 SET(SRC_LIST 

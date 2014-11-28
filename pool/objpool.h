@@ -27,8 +27,12 @@ public:
 		return (T*)mempool::allocator(sizeof(T)*len);
 	}
 
-	static void deallocator(T * buff, int len){
-		mempool::deallocator(buff, sizeof(T)*len);
+	static void deallocator(T * buff, int count){
+		for (int i = 0; i < count; i++){
+			buff[i].~T();
+		}
+
+		mempool::deallocator(buff, sizeof(T)*count);
 	}
 
 private:
