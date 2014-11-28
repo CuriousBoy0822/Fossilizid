@@ -87,6 +87,7 @@ public:
 				break;
 			}
 		}
+		_hazard_que_sys.release(_hazard_que);
 	}
 
 	bool pop(T & data){
