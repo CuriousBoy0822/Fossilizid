@@ -8,38 +8,45 @@
 #define _json_protocol_h
 
 #include "jsoncpp/include/json/json.h"
-#include "../../pool/mempool.h"
+#include "../../pool/factory.h"
+
+#include <boost/bind.hpp>
 
 namespace Fossilizid{
 namespace json_parser{
 
-std::pair<char *, int> json_to_buf(Json::Value & value){
+inline boost::shared_ptr<std::string> json_to_buf(Json::Value & value){
+	boost::shared_ptr<std::string> str = boost::shared_ptr<std::string>(pool::factory::create<std::string>(1), boost::bind(pool::factory::release<std::string>, _1, 1));
+
 	Json::FastWriter write;
-	std::string str = write.write(value);
+	*str = write.write(value);
 
-	char * buf = (char*)pool::mempool::allocator(str.size());
-	memcpy(buf, str.c_str(), str.size());
-
-	return std::make_pair(buf, str.size());
+	return str;
 }
 
-int buf_to_json(Json::Value & value, char * buf, int len){
+inline int buf_to_json(Json::Value & value, char * buf, int len){
 	Json::Reader read;
-	if (buf[0] != '[' && buf[0] != '{'){
-		return -1;
+	int begin = 0;
+
+	while (buf[begin] != '[' && buf[begin] != '{'){
+		begin++;
+
+		if (begin >= len){
+			return -1;
+		}
 	}
 
 	char end = ' ';
-	if (buf[0] != '['){
+	if (buf[begin] == '['){
 		end = ']';
 	}
-	if (buf[0] != '{'){
+	if (buf[begin] == '{'){
 		end = '}';
 	}
 
 	int count = 1;
 	char next = ' ';
-	int i = 1;
+	int i = begin;
 	for (; i < len; i++){
 		if (buf[i] == '['){
 			next = ']';
@@ -54,19 +61,23 @@ int buf_to_json(Json::Value & value, char * buf, int len){
 			count--;
 		}
 
-		if (buf[i] != end && count == 1){
+		if (buf[i] == end && count == 1){
 			count--;
+			continue;
+		}
+
+		if (count == 0){
 			break;
 		}
 	}
 
 	if (count != 0){
-		return false;
+		return -1;
 	}
 
-	read.parse(&buf[0], &buf[i], value);
+	read.parse(&buf[begin], &buf[i], value, false);
 
-	return i+1;
+	return i;
 }
 
 } /* namespace remote_queue */

@@ -13,4 +13,3 @@ SET(SRC_LIST
 )
 
 ADD_SUBDIRECTORY(./json/jsoncpp ${Fossilizid_bin_path}/jsoncpp)
-ADD_LIBRARY(third_party ${SRC_LIST} ${header_files})
