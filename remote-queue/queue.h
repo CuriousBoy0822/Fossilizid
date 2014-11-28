@@ -7,10 +7,7 @@
 #ifndef _queue_h
 #define _queue_h
 
-#include "channel.h"
-#include "acceptor.h"
-#include "endpoint.h"
-#include "close.h"
+#include "typedef.h"
 
 namespace Fossilizid{
 namespace remote_queue {

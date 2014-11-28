@@ -9,16 +9,14 @@
 
 #include "typedef.h"
 
+#ifdef _WINDOWS
+#include "windows/channelimpl.h"
+#endif
+
 namespace Fossilizid{
 namespace remote_queue {
 
-CHANNEL connect(ENDPOINT ep);
-
-template<class CMD, class CMDTOBUF>
-bool push(CHANNEL ch, CMD & cmd, CMDTOBUF fn = CMDTOBUF());
-
-template<class CMD, class BUFTOCMD>
-bool pop(CHANNEL ch, CMD & cmd, BUFTOCMD fn = BUFTOCMD());
+CHANNEL connect(ENDPOINT ep, QUEUE que = 0);
 
 } /* namespace remote_queue */
 } /* namespace Fossilizid */

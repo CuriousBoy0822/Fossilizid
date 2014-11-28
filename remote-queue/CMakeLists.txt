@@ -5,12 +5,14 @@ AUX_SOURCE_DIRECTORY(. DIR_SRC)
 AUX_SOURCE_DIRECTORY(./windows windows_DIR_SRC)
 
 SET(header_files
+    remote_queue.h
     queue.h
     close.h
     acceptor.h
     channel.h
     endpoint.h
     typedef.h
+    ./windows/wsainit.h
     ./windows/overlapped.h
     ./windows/handle.h
     ./windows/acceptorimpl.h

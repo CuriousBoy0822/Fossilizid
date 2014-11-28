@@ -10,17 +10,21 @@
 #ifndef _queueimpl_h
 #define _queueimpl_h
 
+#include "../../container/msque.h"
+
 #include "handle.h"
 #include "../queue.h"
-
-#include "../../container/msque.h"
 
 namespace Fossilizid{
 namespace remote_queue {
 
+
 struct queueimpl : public handle{
 	queueimpl(){
 		_handle_type = handle_queue_type;
+	}
+
+	~queueimpl(){
 	}
 
 	container::msque<EVENT> evque;

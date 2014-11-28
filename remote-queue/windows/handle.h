@@ -10,8 +10,6 @@
 #ifndef _handle_h
 #define _handle_h
 
-#include "../channel.h"
-
 namespace Fossilizid{
 namespace remote_queue {
 

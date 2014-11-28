@@ -15,7 +15,7 @@
 #define _acceptorimlp_h
 
 #include "handle.h"
-#include "../queue.h"
+#include "../typedef.h"
 
 namespace Fossilizid{
 namespace remote_queue{
@@ -23,6 +23,7 @@ namespace remote_queue{
 struct acceptorimlp : public handle{
 	acceptorimlp(QUEUE que, ENDPOINT ep);
 
+	char * outbuf;
 	SOCKET sl, sa;
 	QUEUE que;
 };

@@ -10,7 +10,9 @@
 #ifndef _overlapped_h
 #define _overlapped_h
 
-#include "../channel.h"
+#include <boost/shared_ptr.hpp>
+#include <string>
+
 #include "handle.h"
 
 namespace Fossilizid{
@@ -25,6 +27,11 @@ enum iocp_type{
 struct overlappedex : public OVERLAPPED{
 	handle * h;
 	iocp_type type;
+
+	struct {
+		//only used by send
+		boost::shared_ptr<std::string> buf;
+	} sendbuf;
 };
 
 } /* namespace remote_queue */

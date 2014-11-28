@@ -10,6 +10,8 @@
 #include "../../pool/objpool.h"
 
 #include "../acceptor.h"
+#include "../queue.h"
+
 #include "queueimpl.h"
 #include "overlapped.h"
 #include "acceptorimpl.h"
@@ -25,7 +27,7 @@ QUEUE queue(){
 	GetSystemInfo(&info);
 	corenum = info.dwNumberOfProcessors;
 
-	impl->iocp = CreateIoCompletionPort(0, 0, 0, corenum);
+	impl->iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, corenum);
 
 	return (QUEUE)((handle*)impl);
 }
@@ -33,15 +35,15 @@ QUEUE queue(){
 EVENT queue(QUEUE que){
 	queueimpl * impl = (queueimpl *)((handle*)que);
 
-	EVENT ev;
+	EVENT ev; 
+	ev.type = event_type_none;
+	ev.handle.acp = 0;
+	
 	DWORD bytes = 0;
 	ULONG_PTR ptr = 0;
 	LPOVERLAPPED ovp = 0;
-	if (!GetQueuedCompletionStatus(impl->iocp, &bytes, &ptr, &ovp, 25)){
-		ev.type = event_type_none;
-		ev.handle.acp = 0;
-	} else{
-		overlappedex * ovlp = (overlappedex *)ovp;
+	if (GetQueuedCompletionStatus(impl->iocp, &bytes, &ptr, &ovp, 25)){
+		overlappedex * ovlp = static_cast<overlappedex *>(ovp);
 		
 		if (ovlp->type == iocp_type_accept){
 			ev.type = event_type_accept;

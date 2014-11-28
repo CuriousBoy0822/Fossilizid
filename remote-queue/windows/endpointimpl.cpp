@@ -9,6 +9,7 @@
 
 #include "../../pool/objpool.h"
 
+#include "../endpoint.h"
 #include "endpointimpl.h"
 
 namespace Fossilizid{
@@ -17,6 +18,7 @@ namespace remote_queue {
 ENDPOINT endpoint(char * ip, short port){
 	endpointimpl * impl = pool::objpool<endpointimpl>::allocator(1);
 
+	memset(&impl->addr, 0, sizeof(impl->addr));
 	impl->addr.sin_family = AF_INET;
 	impl->addr.sin_addr.S_un.S_addr = inet_addr(ip);
 	impl->addr.sin_port = port;
