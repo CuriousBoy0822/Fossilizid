@@ -26,7 +26,6 @@ struct em{
 };
 
 boost::mutex mu;
-std::queue<em> que;
 std::vector<std::pair<boost::mutex *, std::queue<int> > > vque;
 
 template<class que>
@@ -98,6 +97,8 @@ void do_test_stl(int tid, std::queue<em> * que, int count){
 	}
 }
 
+boost::thread_specific_ptr<int> p;
+
 template<class que>
 void do_test(int tid, que * _que, int count){
 	for (int i = 0; i < count; i++){
@@ -105,78 +106,105 @@ void do_test(int tid, que * _que, int count){
 	}
 }
 
-int main(){
-	clock_t begin = clock();
+void test_stl(std::queue<em> * que, int count){
 	boost::thread_group _group;
 
+	vque.resize(4);
+	for (int i = 0; i < 4; i++)
+	{
+		vque[i].first = new boost::mutex;
+	}
+
+	clock_t begin = clock();
+
+	for (int i = 0; i < 4; i++){
+		_group.create_thread(boost::bind(do_test_stl, i, que, count));
+	}
+	_group.create_thread(boost::bind(pop_stl, 0, que, count));
+	_group.join_all();
+
+	for (auto v : vque){
+		if (v.second.size() != count){
+			printf("size error\n");
+		}
+
+		for (int i = 0; i < count; i++){
+			if (v.second.front() != i){
+				printf("push error\n");
+			}
+			v.second.pop();
+		}
+	}
+
+	printf("std::queue time %d\n", clock() - begin);
+
+	vque.clear();
+}
+
+template<class que>
+void test(que * _que, int count, std::string que_name){
+	boost::thread_group _group;
+
+	vque.resize(4);
+	for (int i = 0; i < 4; i++)
+	{
+		vque[i].first = new boost::mutex;
+	}
+
+	clock_t begin = clock();
+
+	for (int i = 0; i < 4; i++){
+		_group.create_thread(boost::bind(do_test<que >, i, _que, count));
+	}
+	_group.create_thread(boost::bind(pop<que >, 0, _que, count));
+	_group.join_all();
+
+	for (auto v : vque){
+		if (v.second.size() != count){
+			printf("size error\n");
+		}
+
+		for (int i = 0; i < count; i++){
+			if (v.second.front() != i){
+				printf("push error\n");
+			}
+			v.second.pop();
+		}
+	}
+
+	printf("%s time %d\n", que_name.c_str(), clock() - begin);
+
+	vque.clear();
+}
+
+int main(){
+	
+	clock_t begin = clock();
 	int count = 200000;
 
 	{
-		vque.resize(4);
-		for (int i = 0; i < 4; i++)
-		{
-			vque[i].first = new boost::mutex;
-		}
-
-		begin = clock();
-
-		for (int i = 0; i < 4; i++){
-			_group.create_thread(boost::bind(do_test_stl, i, &que, count));
-		}
-		_group.create_thread(boost::bind(pop_stl, 0, &que, count));
-		_group.join_all();
-
-		for (auto v : vque){
-			if (v.second.size() != count){
-				printf("size error\n");
-			}
-
-			for (int i = 0; i < count; i++){
-				if (v.second.front() != i){
-					printf("push error\n");
-				}
-				v.second.pop();
- 			}
-		}
-
-		printf("std::queue time %d\n", clock() - begin);
-
-		vque.clear();
+		std::queue<em> que;
+		test_stl(&que, count);
 	}
 
 	{
-		vque.resize(4);
-		for (int i = 0; i < 4; i++)
-		{
-			vque[i].first = new boost::mutex;
-		}
-
-		begin = clock();
-
 		Fossilizid::container::msque<em> que;
+		test(&que, count, "msque");
+	}
 
-		for (int i = 0; i < 4; i++){
-			_group.create_thread(boost::bind(do_test<Fossilizid::container::msque<em>>, i, &que, count));
-		}
-		_group.create_thread(boost::bind(pop<Fossilizid::container::msque<em>>, 0, &que, count));
-		_group.join_all();
+	{
+		Fossilizid::container::optimisticque<em> que;
+		test(&que, count, "optimisticque");
+	}
+	
+	{
+		Fossilizid::container::ringque<em> que;
+		test(&que, count, "ringque");
+	}
 
-		for (auto v : vque){
-			if (v.second.size() != count){
-				printf("size error\n");
-			}
-
-			for (int i = 0; i < count; i++){
-				if (v.second.front() != i){
-					printf("push error\n");
-				}
-				v.second.pop();
-			}
-		}
-
-		printf("msque time %d\n", clock() - begin);
-
-		vque.clear();
+	{
+		Fossilizid::container::swapque<em> que;
+		test(&que, count, "swapque");
 	}
 
 	return 0;

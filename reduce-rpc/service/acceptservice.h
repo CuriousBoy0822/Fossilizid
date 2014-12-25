@@ -12,8 +12,6 @@
 namespace Fossilizid{
 namespace reduce_rpc{
 
-struct semaphore;
-
 class acceptservice : public service{
 public:
 	acceptservice(char * ip, short port);

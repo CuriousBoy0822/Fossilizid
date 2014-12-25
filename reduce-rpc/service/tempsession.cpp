@@ -6,6 +6,7 @@
  */
 #include "service.h"
 #include "tempsession.h"
+#include "rpcsession.h"
 #include "obj.h"
 #include "remote_obj.h"
 
@@ -54,14 +55,24 @@ void tempsession::do_connect_server(boost::shared_ptr<session> _session, Json::V
 	if (_epuuid.isNull()){
 		return;
 	}
-	boost::shared_ptr<session> _rpc = _service_handle->create_rpcsession(_epuuid.asString(), ch);
+	boost::shared_ptr<rpcsession> _rpc = boost::static_pointer_cast<rpcsession>(_service_handle->create_rpcsession(_epuuid.asString(), ch));
+	
+	Json::Value _suuid = value.get("suuid", Json::nullValue);
+	if (_suuid.isNull()){
+		return;
+	}
+
+	Json::Value globalobjarray = value.get("globalobjarray", Json::nullValue);
+	if (globalobjarray.isArray()){
+		for (int i = 0; i < (int)globalobjarray.size(); i++){
+			Json::Value objinfo;
+			objinfo["classname"] = globalobjarray[i]["classname"].asString();
+			objinfo["objid"] = globalobjarray[i]["objid"].asString();
+			_rpc->register_global_obj(boost::shared_ptr<obj>(new remote_obj(boost::static_pointer_cast<session>(_rpc), objinfo)));
+		}
+	}
 
 	if (service_class == "acceptservice"){
-		Json::Value _suuid = value.get("suuid", Json::nullValue);
-		if (_suuid.isNull()){
-			return;
-		}
-
 		Json::Value ret;
 		ret["epuuid"] = _epuuid.asString();
 		ret["suuid"] = _suuid.asString();
@@ -80,20 +91,6 @@ void tempsession::do_connect_server(boost::shared_ptr<session> _session, Json::V
 		do_push(_session, ret);
 	}
 	else if (service_class == "connectservice"){
-		Json::Value _suuid = value.get("suuid", Json::nullValue);
-		if (_suuid.isNull()){
-			return;
-		}
-
-		Json::Value globalobjarray = value.get("globalobjarray", Json::nullValue);
-		if (globalobjarray.isArray()){
-			for (int i = 0; i < (int)globalobjarray.size(); i++){
-				Json::Value objinfo;
-				objinfo["classname"] = globalobjarray[i]["classname"].asString();
-				objinfo["objid"] = globalobjarray[i]["objid"].asString();
-				_service_handle->register_global_obj(boost::shared_ptr<obj>(new remote_obj(_rpc, objinfo)));
-			}
-		}
 	}
 }
 

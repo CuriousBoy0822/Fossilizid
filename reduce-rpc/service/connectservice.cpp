@@ -55,14 +55,23 @@ void connectservice::run_network(){
 						continue;
 					}
 
-					boost::shared_lock<boost::shared_mutex> _shared_lock(mu_map_session);
-					map_session[ch]->do_pop(map_session[ch], value);
-
 					boost::mutex::scoped_lock _scoped_lock(mu_wait_context_list);
 					auto finduuidcontex = wait_context_list.find(_suuid.asString());
 					if (finduuidcontex != wait_context_list.end()){
+						Json::Value _eventtype = value.get("eventtype", Json::nullValue);
+						if (_eventtype.asString() == "rpc_event"){
+							continue;
+						} else{
+							boost::shared_lock<boost::shared_mutex> _shared_lock(mu_map_session);
+							map_session[ch]->do_pop(map_session[ch], value);
+						}
+						
+						std::get<3>(finduuidcontex->second) = boost::shared_ptr<Json::Value>(new Json::Value(value));
 						boost::mutex::scoped_lock lock(mu_wake_up_set);
 						wake_up_set.insert(_suuid.asString());
+					}else{
+						boost::shared_lock<boost::shared_mutex> _shared_lock(mu_map_session);
+						map_session[ch]->do_pop(map_session[ch], value);
 					}
 				}
 			}

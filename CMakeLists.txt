@@ -1,19 +1,16 @@
 PROJECT(Fossilizid)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8) 
 
-find_package(Boost)
-if (Boost_FOUND)
-	link_directories(${Boost_INCLUDE_DIR}//stage//lib)
-	INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
-endif (Boost_FOUND)
+set(BOOST_INCLUDE_PATH ${PROJECT_SOURCE_DIR}//third_party//boost CACHE PATH "Fossilizid include path")
+INCLUDE_DIRECTORIES(${BOOST_INCLUDE_PATH})
 
-MESSAGE(STATUS "This is BOOST lib dir " ${Boost_LIBRARIES})  
-MESSAGE(STATUS "This is BOOST include dir " ${Boost_INCLUDE_DIR})  
+set(BOOST_LIBS_PATH ${PROJECT_SOURCE_DIR}//third_party//boost//libs CACHE PATH "Fossilizid include path")
+link_directories(${BOOST_LIBS_PATH})
 
-MESSAGE(STATUS "This is BINARY dir " ${PROJECT_BINARY_DIR})  
-MESSAGE(STATUS "This is SOURCE dir " ${PROJECT_SOURCE_DIR})  
+set(JSON_INCLUDE_PATH ${PROJECT_SOURCE_DIR}//third_party//json//jsoncpp//include CACHE PATH "Fossilizid include path")
+INCLUDE_DIRECTORIES(${JSON_INCLUDE_PATH})
 
-set(Fossilizid_include_path ${PROJECT_SOURCE_DIR}//.. CACHE PATH "Fossilizid include path")
+set(Fossilizid_include_path ${PROJECT_SOURCE_DIR} CACHE PATH "Fossilizid include path")
 INCLUDE_DIRECTORIES(${Fossilizid_include_path})
 MESSAGE(STATUS "This is include dir " ${Fossilizid_include_path}) 
 
@@ -32,4 +29,5 @@ ADD_SUBDIRECTORY(remote-queue ${Fossilizid_bin_path}/remote-queue)
 ADD_SUBDIRECTORY(container ${Fossilizid_bin_path}/container)
 ADD_SUBDIRECTORY(reduce-rpc ${Fossilizid_bin_path}/reduce-rpc)
 ADD_SUBDIRECTORY(test ${Fossilizid_bin_path}/test)
+ADD_SUBDIRECTORY(context ${Fossilizid_bin_path}/context)
 ADD_SUBDIRECTORY(third_party ${Fossilizid_bin_path}/third_party)

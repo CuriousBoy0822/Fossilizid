@@ -14,8 +14,9 @@
 namespace Fossilizid{
 namespace reduce_rpc {
 
-rpcsession::rpcsession(remote_queue::CHANNEL _ch){
+rpcsession::rpcsession(uuid epuuid, remote_queue::CHANNEL _ch){
 	ch = _ch;
+	_epuuid = epuuid;
 }
 
 rpcsession::~rpcsession(){

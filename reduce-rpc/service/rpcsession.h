@@ -26,7 +26,7 @@ class obj;
 
 class rpcsession : public session{
 public:
-	rpcsession(remote_queue::CHANNEL _ch);
+	rpcsession(uuid epuuid, remote_queue::CHANNEL _ch);
 	~rpcsession();
 
 	void reset(remote_queue::CHANNEL ch);
@@ -54,6 +54,12 @@ public:
 	virtual bool do_push(boost::shared_ptr<session> session, Json::Value & value);
 
 	virtual void do_logic();
+
+public:
+	uuid epuuid(){ return _epuuid; }
+
+private:
+	uuid _epuuid;
 
 private:
 	remote_queue::CHANNEL ch;

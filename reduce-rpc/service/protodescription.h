@@ -7,6 +7,8 @@
 #ifndef _protodescription_h
 #define _protodescription_h
 
+#define RPCCALL
+
 namespace Fossilizid{
 namespace reduce_rpc{
 
@@ -56,7 +58,7 @@ namespace reduce_rpc{
 
 
 /*******************************/
-/*          rpc_event          */
+/*        rpc_event_type       */
 /*******************************/
 
 /*
@@ -69,6 +71,25 @@ namespace reduce_rpc{
  *  rpc调用返回
  */
 
+
+/*******************************/
+/*          rpccallinfo        */
+/*******************************/
+
+/*
+ *  fnname
+ *  调用rpc函数符号
+ */
+	
+/*
+ *  fnargv
+ *  调用rpc函数参数
+ */
+
+/*
+ *  rpcret
+ *  rpc调用返回值
+ */
 
 
 } /* namespace reduce_rpc */

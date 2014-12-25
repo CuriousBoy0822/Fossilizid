@@ -7,6 +7,8 @@
 #ifndef _session_h
 #define _session_h
 
+#include "../../third_party/json/json_protocol.h"
+
 namespace Fossilizid{
 namespace reduce_rpc{
 

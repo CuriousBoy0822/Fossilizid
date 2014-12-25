@@ -12,7 +12,8 @@
 namespace Fossilizid{
 namespace reduce_rpc{
 
-#define RegisterRpcMothed(mothedname, func_str) register_rpc_mothed(mothedname, boost::bind(func_str, this, _1));
+#define RegisterRpcMothed(func_str) register_rpc_mothed(std::make_pair('globalfunc', boost::bind(func_str, _1)));
+#define RegisterRpcMothed(mothedname, func_str) register_rpc_mothed(std::make_pair(mothedname, boost::bind(func_str, this, _1)));
 
 } /* namespace reduce_rpc */
 } /* namespace Fossilizid */

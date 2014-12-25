@@ -28,8 +28,6 @@ private:
 
 };
 
-extern service * _service_handle;
-
 } /* namespace reduce_rpc */
 } /* namespace Fossilizid */
 

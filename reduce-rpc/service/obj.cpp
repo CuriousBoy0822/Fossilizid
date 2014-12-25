@@ -50,7 +50,7 @@ void obj::call_rpc_event(boost::shared_ptr<session> session, Json::Value & value
 		return;
 	}
 
-	Json::Value rpctype = value.get("call_rpc_mothed", Json::nullValue);
+	Json::Value rpctype = value.get("rpc_event_type", Json::nullValue);
 	if (rpctype.isNull()){
 		return;
 	}
