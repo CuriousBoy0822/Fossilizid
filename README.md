@@ -16,7 +16,7 @@ clone this repository
 
 Document
 --------
-https://github.com/NetEase/fossilizid/tree/master/doc
+https://github.com/qianqians/Fossilizid/tree/master/doc
 
 ---
 container: lock-free structure
@@ -38,9 +38,6 @@ pool: mempool & objpool
 
 ----------
 remoteq: network library
-
-----------
-reliablyt: udp reliably transmission 
 
 ----------
 
