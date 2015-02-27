@@ -9,7 +9,7 @@ Getting Started
 
 clone this repository
 
-    $ git clone https://github.com/NetEase/fossilizid
+    $ git clone https://github.com/qianqians/Fossilizid
 
 
 ----------
