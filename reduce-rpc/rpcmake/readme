@@ -1,5 +1,0 @@
-# 以RPCCALL关键字修饰供远程调用的函数
-# rpc函数
-# 支持namespace
-#     class
-# 不支持template
